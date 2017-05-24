@@ -67,57 +67,100 @@ public class ProjectCleanServiceImpl implements IProjectCleanService {
 			cycleCount = (int)(count/100);
 		}
 
-		List<String> propertyList = PropertyUtil.getPropertyNames();//获取一级节点
-        if(propertyList == null) return;
-        String projectnumber = null;
-    	ProjectClean projectClean = null;
-    	provinceList = provinceDao.selectAllProvince();
-    	cityList = cityDao.selectAllCity();
+		String projectnumber = null;
+		ProjectClean projectClean = null;
+		List<String> propertyList = null;
+		provinceList = provinceDao.selectAllProvince();
+		cityList = cityDao.selectAllCity();
 
 		for (int i = 0; i < cycleCount; i++) {
 			List<JSONObject> list = getMongoData(0, 100, "crawler");//因为每处理一条，删除一条，所以这里写的是固定值
 			if(list == null || list.size() <=0) break;
-	    	for (JSONObject jsonObject : list) {
+			for (JSONObject jsonObject : list) {
 				//获取数据类型,通过数据类型获取模版
 				String dataType = jsonObject.getString("来源");
-				if(dataType.equals("北京资产")||dataType.equals("上海资产")){
-					projectnumber = jsonObject.getJSONObject("基本信息").getString("项目编号");
-					projectnumber = projectnumber.substring(projectnumber.lastIndexOf("：")+1, projectnumber.length()-1);
-				} else{
-					projectnumber = jsonObject.getString("项目编号");
-					if(projectnumber != null && !"".equals(projectnumber) && projectnumber.contains("监测编号：")){
-						projectnumber = projectnumber.substring(projectnumber.lastIndexOf("：")+1, projectnumber.length()-1);
+				if(dataType==null)continue;
+				String originalNumber = null;
+				if(("上海资产").equals(dataType)){
+					originalNumber = jsonObject.getJSONObject("基本信息").getString("项目编号");
+					projectnumber = originalNumber;
+				} else if(("北京资产").equals(dataType)){
+					originalNumber = jsonObject.getJSONObject("基本信息").getString("项目编号");
+					projectnumber = originalNumber.substring(originalNumber.lastIndexOf("：")+1, originalNumber.length()-1);
+				}else{
+					originalNumber = jsonObject.getString("项目编号");
+					if(originalNumber != null && !"".equals(originalNumber) && originalNumber.contains("编号：")){
+						projectnumber = originalNumber.substring(originalNumber.lastIndexOf("：")+1, originalNumber.length()-1);
+					}else{
+						projectnumber = originalNumber;
 					}
 				}
-	    		projectClean = projectCleanDao.selectByProjectNumber(projectnumber);
-	    		if(projectClean != null){
-	    			cleanRepeat++;
-	    			mongoTemplate.remove(new Query(Criteria.where("项目编号").is(jsonObject.getString("项目编号"))), "crawler"); //此处删掉mongodb中的数据
-	    			logger.warn("MySQL DB exist projectnumber="+jsonObject.getString("项目编号"));
-	    			continue;
-	    		}
-	    		projectClean = new ProjectClean();
-	    		projectClean.setProjectnumber(projectnumber);
-	    		projectClean.setCreatedate(new Date());
+				projectClean = projectCleanDao.selectByProjectNumber(projectnumber);
+				if(projectClean != null){
+					cleanRepeat++;
+					if(("上海资产").equals(dataType)||("北京资产").equals(dataType)){
+						mongoTemplate.remove(new Query(Criteria.where("基本信息.项目编号").is(originalNumber)), "crawler");
+						logger.warn("MySQL DB exist projectnumber="+originalNumber);
+					}else{
+						mongoTemplate.remove(new Query(Criteria.where("项目编号").is(originalNumber)), "crawler");
+						logger.warn("MySQL DB exist projectnumber="+jsonObject.getString("项目编号"));
+					}
 
-	    		try {
-	    			initProjectCleanFirst(projectClean, jsonObject, propertyList);
-	    			if(projectClean.getZhuanRangFangJianJieArr() != null && projectClean.getZhuanRangFangJianJieArr().size() > 3){
-	    				moreZhuanRangFang++;
-	    				logger.warn("moreZhuanRangFang:"+jsonObject.toJSONString());
-	    				mongoTemplate.remove(new Query(Criteria.where("项目编号").is(jsonObject.getString("项目编号"))), "crawler");
-	    				continue;
-	    			}
-					initProjectCleanSecond(projectClean);
-					projectCleanDao.insert(projectClean);//保存项目基本信息
-					mongoTemplate.remove(new Query(Criteria.where("项目编号").is(jsonObject.getString("项目编号"))), "crawler"); //此处删掉mongodb中的数据
-					cleanSuccess++;
-				} catch (Exception e) {
-					cleanError++;
-					e.printStackTrace();
-					logger.error("have error projectnumber ="+projectnumber);
-					logger.warn(jsonObject.toJSONString());
+					continue;
 				}
+				projectClean = new ProjectClean();
+				projectClean.setProjectnumber(projectnumber);
+				projectClean.setCreatedate(new Date());
+
+				if(("上海资产").equals(dataType)){
+					propertyList = PropertyUtil.getPropertyNames("上海资产");
+					try {
+						initShangHaiCleanFirst(projectClean, jsonObject, propertyList);
+						initShangHaiCleanSecond(projectClean);
+					} catch (Exception e) {
+						cleanError++;
+						e.printStackTrace();
+						logger.error("have error projectnumber ="+projectnumber);
+						logger.warn(jsonObject.toJSONString());
+					}
+				}else if(("北京资产").equals(dataType)){
+					propertyList = PropertyUtil.getPropertyNames("北京资产");
+					try {
+						initBeiJingCleanFirst(projectClean, jsonObject, propertyList);
+						initBeiJingCleanSecond(projectClean);
+					} catch (Exception e) {
+						cleanError++;
+						e.printStackTrace();
+						logger.error("have error projectnumber ="+projectnumber);
+						logger.warn(jsonObject.toJSONString());
+					}
+
+				}else{
+					propertyList = PropertyUtil.getPropertyNames("");
+					try {
+						initProjectCleanFirst(projectClean, jsonObject, propertyList);
+						if(projectClean.getZhuanRangFangJianJieArr() != null && projectClean.getZhuanRangFangJianJieArr().size() > 3){
+							moreZhuanRangFang++;
+							logger.warn("moreZhuanRangFang:"+jsonObject.toJSONString());
+							mongoTemplate.remove(new Query(Criteria.where("项目编号").is(originalNumber)), "crawler");
+							continue;
+						}
+						initProjectCleanSecond(projectClean);
+					} catch (Exception e) {
+						cleanError++;
+						e.printStackTrace();
+						logger.error("have error projectnumber ="+projectnumber);
+						logger.warn(jsonObject.toJSONString());
+					}
+
+				}
+				projectCleanDao.insert(projectClean);//保存项目基本信息
+				if(("上海资产").equals(dataType)||("北京资产").equals(dataType)){
+					mongoTemplate.remove(new Query(Criteria.where("基本信息.项目编号").is(originalNumber)), "crawler");
+				}else{
+					mongoTemplate.remove(new Query(Criteria.where("项目编号").is(originalNumber)), "crawler");
+				}
+				cleanSuccess++;
 
 			}
 		}
@@ -128,13 +171,341 @@ public class ProjectCleanServiceImpl implements IProjectCleanService {
 		logger.info("moreZhuanRangFang="+moreZhuanRangFang);
 	}
 
+	/**
+	 * 解析北京资产二级
+	 * @param projectClean
+	 * @throws Exception
+	 */
+	private void initBeiJingCleanSecond(ProjectClean projectClean) throws Exception{
+		projectClean.setYunprojectnumber("12");
+		byte source = 101;
+		projectClean.setDatafrom(source);
+		JSONObject jsonObject = projectClean.getQiyejiankuang();
+		projectClean.setProjectname(jsonObject.getString("标题"));
+		try {
+			projectClean.setProjectprice(Double.valueOf(jsonObject.getString("转让底价").replace("（万元）", "").replace(",","")));
+			projectClean.setBegindate(DateUtils.parseDate(jsonObject.getString("挂牌日期")));
+			projectClean.setEnddate(DateUtils.parseDate(jsonObject.getString("挂牌截止日期")));
+			projectClean.setTransactionway(jsonObject.getString("交易方式"));
+			projectClean.setCompanyname(jsonObject.getString("转让方名称"));
+			projectClean.setProjectname(jsonObject.getString("标的名称"));
+			projectClean.setAssetType(jsonObject.getString("资产来源"));
+		} catch (Exception e) {
+			projectClean.setProjectprice(null);
+			projectClean.setBegindate(null);
+			projectClean.setBegindate(null);
+		}
+		if(projectClean.getBegindate() != null && projectClean.getEnddate() != null){
+			projectClean.setNoticeperiod(DateUtils.getDutyDays(DateUtils.formatDate(projectClean.getBegindate(), null), DateUtils.formatDate(projectClean.getEnddate(),null)));
+			projectClean.setValidperiod(new Double(DateUtils.getDistanceOfTwoDate(projectClean.getBegindate(),projectClean.getEnddate())).intValue());
+		}
+		//机械设备
+		JSONArray jixieshebeiArray = projectClean.getJixieshebeiArray();
+		if(jixieshebeiArray != null){
+			JSONArray objArray = new JSONArray();
+			JSONObject jixieshebeiObj = new JSONObject();
+			for (int i = 0; i < jixieshebeiArray.size(); i++) {
+				JSONObject jxzbObj = jixieshebeiArray.getJSONObject(i);
+				if(jxzbObj != null){
+					JSONObject mechanicalEquipment = new JSONObject();
+					String suozaidi = jxzbObj.getString("所在地");
+					mechanicalEquipment.put("zichanmiaoshu", jxzbObj.getString("名称"));
+					mechanicalEquipment.put("guiGeXingHao", jxzbObj.getString("规格型号"));
+					mechanicalEquipment.put("suozaidi", suozaidi);
+					mechanicalEquipment.put("guigexinghao", jxzbObj.getString("规格型号"));
+					mechanicalEquipment.put("jiliangdanwei", jxzbObj.getString("计量单位"));
+					mechanicalEquipment.put("shuliang", jxzbObj.getString("数量"));
+					mechanicalEquipment.put("cehgnxinlv", jxzbObj.getString("成新率"));
+					setProvinceName(suozaidi,projectClean);
+					objArray.add(mechanicalEquipment);
+				}
+			}
+			jixieshebeiObj.put("jixieshebei",objArray);
+			projectClean.setMechanicalEquipment(jixieshebeiObj.toString());
+		}
+
+		//交通运输设备
+		JSONArray jtyssbArray = projectClean.getJixieshebeiArray();
+		if(jtyssbArray != null){
+			JSONArray objArray = new JSONArray();
+			JSONObject jtyssbObj = new JSONObject();
+			for (int i = 0; i < jtyssbArray.size(); i++) {
+				JSONObject jtysObj = jtyssbArray.getJSONObject(i);
+				if(jtysObj != null){
+					JSONObject mechanicalEquipment = new JSONObject();
+					String suozaidi = jtysObj.getString("所在地");
+					mechanicalEquipment.put("zichanmiaoshu", jtysObj.getString("号牌号码"));
+					mechanicalEquipment.put("guiGeXingHao", jtysObj.getString("型号"));
+					mechanicalEquipment.put("suozaidi", suozaidi);
+					mechanicalEquipment.put("guigexinghao", jtysObj.getString("购置日期"));
+					mechanicalEquipment.put("jiliangdanwei", jtysObj.getString("数量"));
+					mechanicalEquipment.put("shuliang", jtysObj.getString("登记日期"));
+					mechanicalEquipment.put("cehgnxinlv", jtysObj.getString("使用年限"));
+					mechanicalEquipment.put("cehgnxinlv", jtysObj.getString("颜色"));
+					mechanicalEquipment.put("cehgnxinlv", jtysObj.getString("行驶公里数（万）"));
+					setProvinceName(suozaidi,projectClean);
+					objArray.add(mechanicalEquipment);
+				}
+			}
+			jtyssbObj.put("jiaotongyunshushebei",objArray);
+			projectClean.setMotorVehicle(jtyssbObj.toString());
+		}
+		//保证金设定
+		JSONObject bzjsdObj = projectClean.getBaozhengjinsheding();
+		if(bzjsdObj != null){
+			try {
+				projectClean.setPayMoney(Double.valueOf(bzjsdObj.getString("交纳金额").replace("（万元）", "")));
+				projectClean.setPayDate(jsonObject.getString("交纳截止时间"));
+			} catch (Exception e) {
+				projectClean.setPayMoney(null);
+				projectClean.setPayDate(null);
+			}
+		}
+		//重要信息披露
+		String  zyxxpl = projectClean.getQtplnr();
+		if(zyxxpl != null){
+			JSONObject imporInforDisclosure = new JSONObject();
+			imporInforDisclosure.put("qiTaPiLuNeiRong", zyxxpl);
+			projectClean.setImporinfordisclosure(imporInforDisclosure.toString());
+		}
+		//相关附件
+		StringBuffer files = new StringBuffer();
+		JSONArray fujian = projectClean.getFujian();
+		for (int i = 0; i < fujian.size(); i++) {
+			String file = (String)fujian.get(i);
+			files.append(file);
+			if(i < fujian.size()-1){
+				files.append(",");
+			}
+		}
+		projectClean.setFile(files.toString());
+
+		//不动产
+		//1.房屋建筑物
+		JSONArray budongchanArray = projectClean.getBudongchanArray();
+		if(budongchanArray != null){
+			JSONObject bdcObj = new JSONObject();
+			JSONArray objArray = new JSONArray();
+			/*objType*/
+			JSONObject obj = budongchanArray.getJSONObject(budongchanArray.size()-1);
+			if(obj==null||budongchanArray.size()==1){
+				return;
+			}else{
+				String objType = obj.getString("objType");
+				if(objType==null||"".equals(objType)){
+					return;
+				}else if("fangwujianzhuwu".equals(objType)){
+					for (int i = 0; i < budongchanArray.size()-1; i++) {
+						JSONObject object = budongchanArray.getJSONObject(i);
+						JSONObject fwjzwObj = new JSONObject();
+						fwjzwObj.put("diLiWeiZhi", object.getString("坐落位置"));
+						fwjzwObj.put("quanZhengBianHao", object.getString("房产证号"));
+						fwjzwObj.put("muQianYongTu", object.getString("目前用途"));
+						fwjzwObj.put("fangWuFuShuSheBeiJiZhuangShiQingKuang", object.getString("附属设施"));
+						fwjzwObj.put("jianZhuMianJi", object.getString("建筑面积（平方米）"));
+						fwjzwObj.put("shiYongQiXian", object.getString("使用年限"));
+						fwjzwObj.put("yiYongNianXian", object.getString("已用年限"));
+						objArray.add(fwjzwObj);
+					}
+					bdcObj.put("fangwujianzhuwu",objArray);
+
+				}else if("tudi".equals(objType)){
+					for (int i = 0; i < budongchanArray.size()-1; i++) {
+						JSONObject object = budongchanArray.getJSONObject(i);
+						JSONObject tudiObj = new JSONObject();
+						tudiObj.put("diLiWeiZhi", object.getString("坐落位置"));
+						tudiObj.put("quanZhengBianHao", object.getString("土地证号"));
+						tudiObj.put("tuDiMianJi", object.getString("土地面积（平方米）"));
+						tudiObj.put("muQianYongTu", object.getString("用途"));
+						tudiObj.put("tuDiLeiXing", object.getString("类型"));
+						tudiObj.put("shiYongQiXian", object.getString("使用年限"));
+						tudiObj.put("yiYongNianXian", object.getString("已用年限"));
+						objArray.add(tudiObj);
+					}
+					bdcObj.put("tudi",objArray);
+				}else{
+					for (int i = 0; i < budongchanArray.size()-1; i++) {
+						JSONObject object = budongchanArray.getJSONObject(i);
+						JSONObject chObj = new JSONObject();
+						chObj.put("mingcheng", object.getString("名称"));
+						chObj.put("guiGeXingHao", object.getString("规格型号"));
+						chObj.put("suoZaiDi", object.getString("所在地"));
+						chObj.put("shuLiang", object.getString("数量"));
+						chObj.put("jiLiangDanWei", object.getString("计量单位"));
+						objArray.add(chObj);
+					}
+					bdcObj.put("cunhuo",objArray);
+				}
+			}
+			projectClean.setImmovables(bdcObj.toJSONString());
+		}
+	}
+	/**
+	 * 解析上海资产二级
+	 * @param projectClean
+	 * @throws Exception
+	 */
+	private void initShangHaiCleanSecond(ProjectClean projectClean) throws Exception{
+		projectClean.setYunprojectnumber("12");
+		byte source = 102;
+		projectClean.setDatafrom(source);
+		JSONObject jsonObject = projectClean.getQiyejiankuang();
+		projectClean.setProjectname(jsonObject.getString("标题"));
+		try {
+			projectClean.setProjectprice(Double.valueOf(jsonObject.getString("挂牌价格").replace("（万元）", "")));
+			projectClean.setBegindate(DateUtils.parseDate(jsonObject.getString("挂牌起始日期")));
+			projectClean.setEnddate(DateUtils.parseDate(jsonObject.getString("挂牌期满日期")));
+			projectClean.setSourcearea(jsonObject.getString("标的所在地区"));
+			projectClean.setRightCategory(jsonObject.getString("物权类别"));
+		} catch (Exception e) {
+			projectClean.setProjectprice(null);
+			projectClean.setBegindate(null);
+			projectClean.setBegindate(null);
+		}
+		if(projectClean.getBegindate() != null && projectClean.getEnddate() != null){
+			projectClean.setNoticeperiod(DateUtils.getDutyDays(DateUtils.formatDate(projectClean.getBegindate(), null), DateUtils.formatDate(projectClean.getEnddate(),null)));
+			projectClean.setValidperiod(new Double(DateUtils.getDistanceOfTwoDate(projectClean.getBegindate(),projectClean.getEnddate())).intValue());
+		}
+
+		//机动车
+		JSONObject jdcObj = projectClean.getJidongche();
+		if(jdcObj != null){
+			JSONObject motorVehicle = new JSONObject();
+			String suozaidi = jdcObj.getString("所在地");
+			motorVehicle.put("zichanmiaoshu", jdcObj.getString("资产描述"));
+			motorVehicle.put("suozaidi", suozaidi);
+			motorVehicle.put("chexing", jdcObj.getString("车型"));
+			motorVehicle.put("yanse", jdcObj.getString("颜色"));
+			try {
+				motorVehicle.put("gouzhiriqi", DateUtils.parseDate(jdcObj.getString("购置日期")));
+			} catch (Exception e) {
+				e.printStackTrace();
+				motorVehicle.put("gouzhiriqi", null);
+			}
+			motorVehicle.put("zhucedengjiriqi", jdcObj.getString("注册登记日期"));
+			motorVehicle.put("shifoubaohanchepai", jdcObj.getString("是否包含车牌"));
+			motorVehicle.put("shuliang", jdcObj.getString("数量"));
+			motorVehicle.put("xingshigonglishu", jdcObj.getString("行驶公里数"));
+			motorVehicle.put("biaodezhanshishijian", jdcObj.getString("标的展示时间"));
+			motorVehicle.put("biaodezhanshididian", jdcObj.getString("标的展示地点"));
+			setProvinceName(suozaidi,projectClean);
+			projectClean.setMotorVehicle(motorVehicle.toString());
+		}
+
+		//不动产
+		JSONObject bdcObj = projectClean.getBudongchan();
+		if(bdcObj != null){
+			JSONObject immovables = new JSONObject();
+			String diliweizhi = bdcObj.getString("地理位置");
+			immovables.put("zichanmiaoshu", bdcObj.getString("资产描述"));
+			immovables.put("mingcheng", bdcObj.getString("名称"));
+			immovables.put("diliweizhi", diliweizhi);
+			immovables.put("quanyixingzhi", bdcObj.getString("权属性质"));
+			immovables.put("quanzhengbianhao", bdcObj.getString("权证编号"));
+			immovables.put("guihuayongtu", bdcObj.getString("规划用途"));
+			immovables.put("muqianyongtu", bdcObj.getString("目前用途"));
+			immovables.put("tudimianji", bdcObj.getString("土地面积"));
+			immovables.put("jainzhumianji", bdcObj.getString("建筑面积"));
+			immovables.put("quanzhengmianji", bdcObj.getString("权证面积"));
+			immovables.put("shiyongqixian", bdcObj.getString("使用期限"));
+			immovables.put("fangwufushushebei", bdcObj.getString("房屋附属设备及装饰情况"));
+			immovables.put("peitaosheshi", bdcObj.getString("配套设施"));
+			immovables.put("zhoubianhaunjing", bdcObj.getString("周边环境"));
+			immovables.put("gongyongqingkuang", bdcObj.getString("共有情况"));
+			immovables.put("zhanshishijain", bdcObj.getString("标的展示时间"));
+			immovables.put("zhanhsididian", bdcObj.getString("标的展示地点"));
+			setProvinceName(diliweizhi,projectClean);
+			projectClean.setMotorVehicle(immovables.toString());
+		}
+
+
+		//机械设备
+		JSONObject jxzbObj = projectClean.getJixieshebei();
+		if(jxzbObj != null){
+			JSONObject mechanicalEquipment = new JSONObject();
+			String suozaidi = jxzbObj.getString("所在地");
+			mechanicalEquipment.put("zichanmiaoshu", jxzbObj.getString("资产描述"));
+			mechanicalEquipment.put("mingcheng", jxzbObj.getString("名称"));
+			mechanicalEquipment.put("suozaidi", suozaidi);
+			mechanicalEquipment.put("guigexinghao", jxzbObj.getString("规格型号"));
+			mechanicalEquipment.put("jiliangdanwei", jxzbObj.getString("计量单位"));
+			mechanicalEquipment.put("shuliang", jxzbObj.getString("数量"));
+			mechanicalEquipment.put("cehgnxinlv", jxzbObj.getString("成新率"));
+			mechanicalEquipment.put("zhuyaogongnengyongtu", jxzbObj.getString("主要功能用途"));
+			mechanicalEquipment.put("gongyongqingkuang", jxzbObj.getString("共有情况"));
+			mechanicalEquipment.put("zhanshishijain", jxzbObj.getString("标的展示时间"));
+			mechanicalEquipment.put("zhanhsididian", jxzbObj.getString("标的展示地点"));
+			setProvinceName(suozaidi,projectClean);
+			projectClean.setMotorVehicle(mechanicalEquipment.toString());
+		}
+
+		//保证金设定
+		JSONObject bzjsdObj = projectClean.getBaozhengjinsheding();
+		if(bzjsdObj != null){
+			try {
+				projectClean.setPayMoney(Double.valueOf(bzjsdObj.getString("交纳金额").replace("（万元）", "")));
+				projectClean.setPayDate(jsonObject.getString("交纳截止时间"));
+			} catch (Exception e) {
+				e.printStackTrace();
+				projectClean.setPayMoney(null);
+				projectClean.setPayDate(null);
+			}
+		}
+
+		//重要信息披露
+		JSONObject zyxxplObj = projectClean.getZhongyaoxinxipilu();
+		if(zyxxplObj != null){
+			JSONObject imporInforDisclosure = new JSONObject();
+			imporInforDisclosure.put("qiTaPiLuNeiRong", zyxxplObj.getString("其他披露内容"));
+			imporInforDisclosure.put("sjbaogao", zyxxplObj.getString("审计报告和评估报告中的保留意见、重要揭示、特别事项说明中涉及转让产权的提示提醒等内容"));
+			projectClean.setImporinfordisclosure(imporInforDisclosure.toString());
+		}
+
+
+		//转让方基本情况
+		JSONObject zhuanrangfang = projectClean.getZhuanRangFangJianJie();
+		if(zhuanrangfang != null){
+			JSONObject transferInfo = new JSONObject();
+			String string = zhuanrangfang.getString("转让方名称");
+			transferInfo.put("zhuanRangFangMingCheng", string);
+			transferInfo.put("jingjileixing", zhuanrangfang.getString("经济类型"));
+			projectClean.setCompanyname(string);
+			projectClean.setTransferinfo(transferInfo.toString());
+		}
+		//附件
+		StringBuffer files = new StringBuffer();
+		JSONArray fujian = projectClean.getFujian();
+		for (int i = 0; i < fujian.size(); i++) {
+			String file = (String)fujian.get(i);
+			files.append(file);
+			if(i < fujian.size()-1){
+				files.append(",");
+			}
+		}
+		projectClean.setFile(files.toString());
+	}
+
+	//获取地区省份
+	private void  setProvinceName(String key1,ProjectClean projectClean){
+		if(key1 != null){
+			if(projectClean.getProvince() == null){
+				for (Province province : provinceList) {
+					if(key1.contains(province.getProvincename())){
+						projectClean.setProvince(province.getProvincename());
+						break;
+					}
+				}
+			}
+		}
+	}
+
 
 	/**
 	 * 从ProjectClean类中解析一级节点
 	 * @param projectClean
 	 */
 	private void initProjectCleanSecond(ProjectClean projectClean) throws Exception{
-		projectClean.setYunprojectnumber(initType(projectClean.getLaiyuan()));
+		projectClean.setYunprojectnumber("11");
 		if(projectClean.getBegindate() != null && projectClean.getEnddate() != null){
 			projectClean.setNoticeperiod(DateUtils.getDutyDays(DateUtils.formatDate(projectClean.getBegindate(), null), DateUtils.formatDate(projectClean.getEnddate(),null)));
 			projectClean.setValidperiod(new Double(DateUtils.getDistanceOfTwoDate(projectClean.getBegindate(),projectClean.getEnddate())).intValue());
@@ -689,105 +1060,264 @@ public class ProjectCleanServiceImpl implements IProjectCleanService {
 	private void initProjectCleanFirst(ProjectClean projectClean, JSONObject jsonObject, List<String> propertyList) {
 		for (String str : propertyList) {
 			//System.out.println(str);
-			String s = PropertyUtil.getStringProperty(str);
-			if (s.equals("jiaoyitiaojian")) {
-				if (jsonObject.getJSONObject(str) != null) {
-					projectClean.setFourJiaoYiTiaoJian(jsonObject.getJSONObject(str));
-				} else {
-					projectClean.setFourJiaoYiTiaoJian(jsonObject.getJSONObject("三：交易条件与受让方资格条件"));//重庆
-				}
-
-			} else if (s.equals("biaodisuoshuhangye")) {
-				if (jsonObject.getString(str) != null) {
-					projectClean.setSourcecategory(jsonObject.getString(str));
-				} else {//北京 所属行业
-					projectClean.setSourcecategory(jsonObject.getString("所属行业"));
-				}
-
-			} else if (s.equals("guapaijiage")) {
-				if (jsonObject.getString(str) != null) {
-					try {
-						projectClean.setProjectprice(Double.valueOf(jsonObject.getString(str).replace("（万元）", "").replace("(万元)", "").replace("万元", "")));
-					} catch (NumberFormatException e) {
-						projectClean.setProjectprice(null);
+			switch (PropertyUtil.getStringProperty(str)) {
+				case "jiaoyitiaojian":
+					if(jsonObject.getJSONObject(str) != null){
+						projectClean.setFourJiaoYiTiaoJian(jsonObject.getJSONObject(str));
+					}else {
+						projectClean.setFourJiaoYiTiaoJian(jsonObject.getJSONObject("三：交易条件与受让方资格条件"));//重庆
 					}
-				} else {
-					projectClean.setProjectprice(Double.valueOf(jsonObject.getString("转让底价").replace("万元", "")));//北京
-				}
+					break;
 
-			} else if (s.equals("suozaidiqu")) {
-				if (jsonObject.getString(str) != null) {
-					projectClean.setRegion(jsonObject.getString(str));
-				} else {//北京  所在地区
-					projectClean.setRegion(jsonObject.getString("所在地区"));
-				}
-
-			} else if (s.equals("guapaiqishiriqi")) {
-				if (jsonObject.getString(str) != null) {
-					projectClean.setBegindate(DateUtils.parseDate(jsonObject.getString(str)));
-				} else {
-					projectClean.setBegindate(DateUtils.parseDate(jsonObject.getString("信息披露起始日期")));//北京
-				}
-
-			} else if (s.equals("qiyejiankuang")) {
-				if (jsonObject.getJSONObject(str) != null) {
-					projectClean.setQiyejiankuang(jsonObject.getJSONObject(str)); //二、标的企业简况  ---、天津、上海
-				} else if (jsonObject.getJSONObject("二：标的企业简况") != null) { //重庆
-					projectClean.setQiyejiankuang(jsonObject.getJSONObject("二：标的企业简况"));
-				} else {
-					projectClean.setQiyejiankuang(jsonObject.getJSONObject("二、转让标的基本情况"));//北京
-				}
-
-			} else if (s.equals("biaodimingcheng")) {
-				if (jsonObject.getString(str) != null) {
-					projectClean.setProjectname(jsonObject.getString(str));
-				} else if (jsonObject.getString("转让标的名称") != null) {
-					projectClean.setProjectname(jsonObject.getString("转让标的名称")); //重庆是转让标的名称
-				} else {
-					projectClean.setProjectname(jsonObject.getString("项目名称")); //北京
-				}
-
-			} else if (s.equals("zhuanrangfangjianjie")) {
-				if (jsonObject.getString(str) != null && !"".equals(jsonObject.getString(str))) {
-					if (jsonObject.getString(str).startsWith("{")) {
-						if (jsonObject.getJSONObject(str) != null) {
-							projectClean.setZhuanRangFangJianJie(jsonObject.getJSONObject(str));//三、转让方简况
-						}
-					} else if (jsonObject.getString(str).startsWith("[")) {
-						if (jsonObject.getJSONArray(str) != null) {//北京
-							projectClean.setZhuanRangFangJianJieArr(jsonObject.getJSONArray(str));
-						}
+				case "biaodisuoshuhangye":
+					if(jsonObject.getString(str) != null){
+						projectClean.setSourcecategory(jsonObject.getString(str));
+					}else{//北京 所属行业
+						projectClean.setSourcecategory(jsonObject.getString("所属行业"));
 					}
-				} else if (jsonObject.getString("四：转让方简况") != null && !"".equals(jsonObject.getString("四：转让方简况"))) {
-					projectClean.setZhuanRangFangJianJie(jsonObject.getJSONObject("四：转让方简况"));//重庆  四：转让方简况
-				} else if (jsonObject.getJSONArray("三、转让方基本情况") != null) {//北京
-					projectClean.setZhuanRangFangJianJieArr(jsonObject.getJSONArray("三、转让方基本情况"));
-				}
+					break;
 
+				case "guapaijiage":
+					if(jsonObject.getString(str) != null){
+						try {
+							projectClean.setProjectprice(Double.valueOf(jsonObject.getString(str).replace("（万元）", "").replace("(万元)", "").replace("万元", "")));
+						} catch (NumberFormatException e) {
+							projectClean.setProjectprice(null);
+						}
+					}else{
+						projectClean.setProjectprice(Double.valueOf(jsonObject.getString("转让底价").replace("万元", "")));//北京
+					}
+					break;
 
-			} else if (s.equals("guapaixinxi")) {
-				if (jsonObject.getJSONObject(str) != null) {
-					projectClean.setGuaPaiXinXi(jsonObject.getJSONObject(str));//五、挂牌信息
-				} else if (jsonObject.getJSONObject("六、竞价方式") != null) {
-					projectClean.setGuaPaiXinXi(jsonObject.getJSONObject("六、竞价方式"));//北京
-				} else {
-					projectClean.setGuaPaiXinXi(jsonObject.getJSONObject("五：挂牌信息"));//重庆
-				}
+				case "suozaidiqu":
+					if(jsonObject.getString(str) != null){
+						projectClean.setRegion(jsonObject.getString(str));
+					}else{//北京  所在地区
+						projectClean.setRegion(jsonObject.getString("所在地区"));
+					}
+					break;
 
-			} else if (s.equals("guapaiqimanriqi")) {
-				if (jsonObject.getString(str) != null) {
-					projectClean.setEnddate(DateUtils.parseDate(jsonObject.getString(str)));
-				} else {
-					projectClean.setEnddate(DateUtils.parseDate(jsonObject.getString("信息披露结束日期")));//北京
-				}
+				case "guapaiqishiriqi":
+					if(jsonObject.getString(str) != null){
+						projectClean.setBegindate(DateUtils.parseDate(jsonObject.getString(str)));
+					}else{
+						projectClean.setBegindate(DateUtils.parseDate(jsonObject.getString("信息披露起始日期")));//北京
+					}
+					break;
 
-			} else if (s.equals("laiyuan")) {
-				projectClean.setDatafrom(initSource(jsonObject.getString(str)));
-				projectClean.setLaiyuan(jsonObject.getString(str));
+				case "qiyejiankuang":
+					if(jsonObject.getJSONObject(str) != null){
+						projectClean.setQiyejiankuang(jsonObject.getJSONObject(str)); //二、标的企业简况  ---、天津、上海
+					}else if(jsonObject.getJSONObject("二：标的企业简况") != null){ //重庆
+						projectClean.setQiyejiankuang(jsonObject.getJSONObject("二：标的企业简况"));
+					}else{
+						projectClean.setQiyejiankuang(jsonObject.getJSONObject("二、转让标的基本情况"));//北京
+					}
+					break;
 
-			} else {
+				case "biaodimingcheng":
+					if(jsonObject.getString(str) != null){
+						projectClean.setProjectname(jsonObject.getString(str));
+					}else if(jsonObject.getString("转让标的名称") != null) {
+						projectClean.setProjectname(jsonObject.getString("转让标的名称")); //重庆是转让标的名称
+					}else{
+						projectClean.setProjectname(jsonObject.getString("项目名称")); //北京
+					}
+					break;
+
+				case "zhuanrangfangjianjie":
+					if(jsonObject.getString(str) != null && !"".equals(jsonObject.getString(str))){
+						if(jsonObject.getString(str).startsWith("{")){
+							if(jsonObject.getJSONObject(str) != null){
+								projectClean.setZhuanRangFangJianJie(jsonObject.getJSONObject(str));//三、转让方简况
+							}
+						}else if (jsonObject.getString(str).startsWith("[")){
+							if(jsonObject.getJSONArray(str) != null){//北京
+								projectClean.setZhuanRangFangJianJieArr(jsonObject.getJSONArray(str));
+							}
+						}
+					}else if(jsonObject.getString("四：转让方简况") != null && !"".equals(jsonObject.getString("四：转让方简况"))){
+						projectClean.setZhuanRangFangJianJie(jsonObject.getJSONObject("四：转让方简况"));//重庆  四：转让方简况
+					}else if(jsonObject.getJSONArray("三、转让方基本情况") != null){//北京
+						projectClean.setZhuanRangFangJianJieArr(jsonObject.getJSONArray("三、转让方基本情况"));
+					}
+
+					break;
+
+				case "guapaixinxi":
+					if(jsonObject.getJSONObject(str) != null){
+						projectClean.setGuaPaiXinXi(jsonObject.getJSONObject(str));//五、挂牌信息
+					}else if(jsonObject.getJSONObject("六、竞价方式") != null){
+						projectClean.setGuaPaiXinXi(jsonObject.getJSONObject("六、竞价方式"));//北京
+					}else{
+						projectClean.setGuaPaiXinXi(jsonObject.getJSONObject("五：挂牌信息"));//重庆
+					}
+					break;
+
+				case "guapaiqimanriqi":
+					if(jsonObject.getString(str) != null){
+						projectClean.setEnddate(DateUtils.parseDate(jsonObject.getString(str)));
+					}else{
+						projectClean.setEnddate(DateUtils.parseDate(jsonObject.getString("信息披露结束日期")));//北京
+					}
+					break;
+
+				case "laiyuan":
+					projectClean.setDatafrom(initSource(jsonObject.getString(str)));
+					projectClean.setLaiyuan(jsonObject.getString(str));
+					break;
+
+				default:
+					break;
 			}
-    	}
+		}
+	}
+	/**
+	 * 初始化上海资产一级菜单
+	 */
+	private void initShangHaiCleanFirst(ProjectClean projectClean, JSONObject jsonObject, List<String> propertyList) {
+		for (String str : propertyList) {
+			//System.out.println(str);
+			switch (PropertyUtil.getStringProperty(str)) {
+				//基本信息
+				case "jibenxinxi":
+					if(jsonObject.getJSONObject(str) != null){
+						projectClean.setQiyejiankuang(jsonObject.getJSONObject(str));
+					}
+					break;
+				//不动产
+				case "budongchan":
+					if(jsonObject.getJSONObject(str) != null){
+						projectClean.setBudongchan(jsonObject.getJSONObject(str));
+					}
+					break;
+				//机动车
+				case "jidongche":
+					if(jsonObject.getJSONObject(str) != null){
+						projectClean.setJidongche(jsonObject.getJSONObject(str));
+					}
+					break;
+				//机械设备
+				case "jixieshebei":
+					if(jsonObject.getJSONObject(str) != null){
+						projectClean.setJixieshebei(jsonObject.getJSONObject(str));
+					}
+					break;
+				//保证金设定
+				case "baozhengjinsheding":
+					if(jsonObject.getJSONObject(str) != null){
+						projectClean.setBaozhengjinsheding(jsonObject.getJSONObject(str));
+					}
+					break;
+				//重要信息披露
+				case "zhongyaoxinxipilu":
+					if(jsonObject.getJSONObject(str) != null){
+						projectClean.setZhongyaoxinxipilu(jsonObject.getJSONObject(str));
+					}
+					break;
+				//主要财务指标
+				case "zhuyaocaiwuzhibiao":
+					if(jsonObject.getJSONObject(str) != null){
+						projectClean.setZhuyaocaiwuzhibiao(jsonObject.getJSONObject(str));
+					}
+					break;
+				//转让方基本情况
+				case "zhuanrangfangjibenqingkuang":
+					if(jsonObject.getJSONObject(str) != null){
+						projectClean.setZhuanRangFangJianJie(jsonObject.getJSONObject(str));
+					}
+					break;
+				//附件
+				case "fujian":
+					if(jsonObject.getJSONArray(str) != null){
+						projectClean.setFujian(jsonObject.getJSONArray(str));
+					}
+					break;
+
+				default:
+					break;
+			}
+		}
+	}
+
+	/**
+	 * 初始化北京资产一级菜单
+	 */
+	private void initBeiJingCleanFirst(ProjectClean projectClean, JSONObject jsonObject, List<String> propertyList) {
+		for (String str : propertyList) {
+			//System.out.println(str);
+			switch (PropertyUtil.getStringProperty(str)) {
+				//基本信息
+				case "jibenxinxi":
+					if(jsonObject.getJSONObject(str) != null){
+						projectClean.setQiyejiankuang(jsonObject.getJSONObject(str));
+					}
+					break;
+				//交通运输设备
+				case "jiaotongyunshushebei":
+					if(jsonObject.getJSONArray(str) != null){
+						projectClean.setJidongcheArray(jsonObject.getJSONArray(str));
+					}
+					break;
+				//存货
+				case "cunhuo":
+					if(jsonObject.getJSONArray(str) != null){
+						JSONArray jsonArray = jsonObject.getJSONArray(str);
+						JSONObject objType = new JSONObject();
+						objType.put("objType","cunhuo");
+						jsonArray.add(objType);
+						projectClean.setBudongchanArray(jsonArray);
+					}
+					break;
+				//房屋建筑物
+				case "fangwujianzhuwu":
+					if(jsonObject.getJSONArray(str) != null){
+						JSONArray jsonArray = jsonObject.getJSONArray(str);
+						JSONObject objType = new JSONObject();
+						objType.put("objType","fangwujianzhuwu");
+						jsonArray.add(objType);
+						projectClean.setBudongchanArray(jsonArray);
+					}
+					break;
+				//土地
+				case "tudi":
+					if(jsonObject.getJSONArray(str) != null){
+						JSONArray jsonArray = jsonObject.getJSONArray(str);
+						JSONObject objType = new JSONObject();
+						objType.put("objType","tudi");
+						jsonArray.add(objType);
+						projectClean.setBudongchanArray(jsonArray);
+					}
+					break;
+				//机械设备
+				case "jixieshebei":
+					if(jsonObject.getJSONArray(str) != null){
+						projectClean.setJixieshebeiArray(jsonObject.getJSONArray(str));
+					}
+					break;
+				//保证金设定
+				case "baozhengjinsheding":
+					if(jsonObject.getJSONObject(str) != null){
+						projectClean.setBaozhengjinsheding(jsonObject.getJSONObject(str));
+					}
+					break;
+				//相关附件
+				case "fujian":
+					if(jsonObject.getJSONArray(str) != null){
+						projectClean.setFujian(jsonObject.getJSONArray(str));
+					}
+					break;
+				//其他需要披露的内容
+				case "qtplnr":
+					if(jsonObject.getString(str) != null){
+						projectClean.setQtplnr(jsonObject.getString(str));
+					}
+					break;
+
+				default:
+					break;
+			}
+		}
 	}
 
 	private byte initSource(String string) {
@@ -804,14 +1334,18 @@ public class ProjectCleanServiceImpl implements IProjectCleanService {
 		return source;
 	}
 
-
-	/*项目
+	/**
+	 * 北京产权交易所：央企产权项目
+	 * 北京产权交易所：市属产权项目
+	 * 重庆产权交易网：国有资产股权
+	 * 上海联合产权交易所：央企股权项目
+	 * 上海联合产权交易所：央企股权项目
 	 * 天津产权交易中心：国有股权转让
 	 * @param laiyuan
 	 * @return
 	 */
-	private String initType(String laiyuan){
-		String type = "01";
+	/*private String initType(String laiyuan){
+		String type = "11";
 		String leixing = laiyuan.split("：")[1];
 		switch (leixing) {
 		case "央企产权项目":
@@ -841,7 +1375,7 @@ public class ProjectCleanServiceImpl implements IProjectCleanService {
 		}
 
 		return type;
-	}
+	}*/
 
 	/**
 	 * 天津年度审计报告

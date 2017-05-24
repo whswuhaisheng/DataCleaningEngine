@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.binggou.cloud.persistence.annotation.CityDao" >
+  <resultMap id="BaseResultMap" type="com.binggou.cloud.model.City" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="ProvinceID" property="provinceid" jdbcType="INTEGER" />
+    <result column="CityName" property="cityname" jdbcType="VARCHAR" />
+    <result column="IsOrder" property="isorder" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    <if test="fields == null" >
+      id, ProvinceID, CityName, IsOrder
+    </if>
+    <if test="fields != null" >
+      ${fields}
+    </if>
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    id,ProvinceID,CityName,IsOrder
+    from bg_resource_city
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from bg_resource_city
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.binggou.cloud.model.City" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="BEFORE" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into bg_resource_city (id, ProvinceID, CityName, 
+      IsOrder)
+    values (#{id,jdbcType=INTEGER}, #{provinceid,jdbcType=INTEGER}, #{cityname,jdbcType=VARCHAR}, 
+      #{isorder,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.binggou.cloud.model.City" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="BEFORE" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into bg_resource_city
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      id,
+      <if test="provinceid != null" >
+        ProvinceID,
+      </if>
+      <if test="cityname != null" >
+        CityName,
+      </if>
+      <if test="isorder != null" >
+        IsOrder,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{id,jdbcType=INTEGER},
+      <if test="provinceid != null" >
+        #{provinceid,jdbcType=INTEGER},
+      </if>
+      <if test="cityname != null" >
+        #{cityname,jdbcType=VARCHAR},
+      </if>
+      <if test="isorder != null" >
+        #{isorder,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.binggou.cloud.model.City" >
+    update bg_resource_city
+    <set >
+      <if test="provinceid != null" >
+        ProvinceID = #{provinceid,jdbcType=INTEGER},
+      </if>
+      <if test="cityname != null" >
+        CityName = #{cityname,jdbcType=VARCHAR},
+      </if>
+      <if test="isorder != null" >
+        IsOrder = #{isorder,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.binggou.cloud.model.City" >
+    update bg_resource_city
+    set ProvinceID = #{provinceid,jdbcType=INTEGER},
+      CityName = #{cityname,jdbcType=VARCHAR},
+      IsOrder = #{isorder,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <select id="selectAllCity" resultMap="BaseResultMap" >
+    select 
+    id,ProvinceID,CityName,IsOrder
+    from bg_resource_city
+  </select>
+</mapper>

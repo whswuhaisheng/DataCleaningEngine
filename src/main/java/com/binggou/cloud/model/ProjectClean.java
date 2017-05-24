@@ -8,31 +8,94 @@ import java.util.Date;
 
 
 public class ProjectClean implements Serializable {
-	private Integer id;
+    private Integer id;
 
     /**
      * 项目编号-抓取项目的编号
      */
     private String projectnumber;
+    private String file;
+
+    public String getFile() {
+        return file;
+    }
+
+    public void setFile(String file) {
+        this.file = file;
+    }
 
     /**
      * 云并购系统项目编号【年份、日期、流水号、类型、来源  】共14位数字构成
-目前类型编号暂定：
-01	央企产权
-02	国有产权
-03	实物资产
-04	诉讼资产
-05	增资
-06	融资
-07	投资意向
-08	非国有产权
-目前来源编号可以确定的有：
-001	北京产权交易所
-002	上海联合产权交易所
-003	重庆联合产权交易所
-004	天津产权交易所
+     目前类型编号暂定：
+     01	央企产权
+     02	国有产权
+     03	实物资产
+     04	诉讼资产
+     05	增资
+     06	融资
+     07	投资意向
+     08	非国有产权
+     目前来源编号可以确定的有：
+     001	北京产权交易所
+     002	上海联合产权交易所
+     003	重庆联合产权交易所
+     004	天津产权交易所
      */
     private String yunprojectnumber;
+    private String motorVehicle;
+    private String immovables;
+    private String mechanicalEquipment;
+    private String payWay;		// 交纳方式
+    private String payDate;		// 交纳时间
+    private Double payMoney;
+
+    public Double getPayMoney() {
+        return payMoney;
+    }
+
+    public void setPayMoney(Double payMoney) {
+        this.payMoney = payMoney;
+    }
+
+    public String getPayWay() {
+        return payWay;
+    }
+
+    public void setPayWay(String payWay) {
+        this.payWay = payWay;
+    }
+
+    public String getPayDate() {
+        return payDate;
+    }
+
+    public void setPayDate(String payDate) {
+        this.payDate = payDate;
+    }
+
+    public String getMotorVehicle() {
+        return motorVehicle;
+    }
+
+    public void setMotorVehicle(String motorVehicle) {
+        this.motorVehicle = motorVehicle;
+    }
+
+    public String getImmovables() {
+        return immovables;
+    }
+
+    public void setImmovables(String immovables) {
+        this.immovables = immovables;
+    }
+
+    public String getMechanicalEquipment() {
+        return mechanicalEquipment;
+    }
+
+    public void setMechanicalEquipment(String mechanicalEquipment) {
+        this.mechanicalEquipment = mechanicalEquipment;
+    }
 
     /**
      * 标的名称
@@ -151,74 +214,74 @@ public class ProjectClean implements Serializable {
 
     /**
      * 标的企业基本情况 JSON格式
-{
- 
- "zhuCeDi": "注册地",
-  
-"chengLiShiJian": "成立时间",
-  
-"zhuCeZiBen": "注册资本",
-  
-"jingYingFanWei": "经营范围",
-  "zhiGongRenShu": "职工人数",
-  "shiFouHanYouGuoYouHuaBoTuDi": "是否含有国有划拨土地"
+     {
 
-}
+     "zhuCeDi": "注册地",
+
+     "chengLiShiJian": "成立时间",
+
+     "zhuCeZiBen": "注册资本",
+
+     "jingYingFanWei": "经营范围",
+     "zhiGongRenShu": "职工人数",
+     "shiFouHanYouGuoYouHuaBoTuDi": "是否含有国有划拨土地"
+
+     }
      */
     private String enterpriseinfo;
 
     /**
      * 股权结构 JSON格式
-{
-  
-"shiFouFangQiYouXianGouMaiQuan": "标的企业原股东是否放弃行使优先购买权",
-  "guDongLiBIao":[
- 
-   {"guDongMingCheng":"股东名称",                 "guDongChiGuBiLi":"股东持股比例"} 
-  
- ]
+     {
 
-}
+     "shiFouFangQiYouXianGouMaiQuan": "标的企业原股东是否放弃行使优先购买权",
+     "guDongLiBIao":[
+
+     {"guDongMingCheng":"股东名称",                 "guDongChiGuBiLi":"股东持股比例"}
+
+     ]
+
+     }
      */
     private String stockstructure;
 
     /**
      * 审计报告 JSON格式
-{
-  "shenJiJiGou": "审计机构",
- 
- "shenJiBaoGao":[
-   
- {"nianDu":"年度",
-  "yingYeShouRu":"营业收入",
-  "yingYeLiRun":"营业利润",
-  "jingLiRun":"净利润",
-     
-  "ziChanZongJi":"资产总计",
-  "fuZhanZongJi":"负债总计",
- "suoYouZheQuanYi":"所有者权益"
-    } 
- 
- ]
+     {
+     "shenJiJiGou": "审计机构",
+
+     "shenJiBaoGao":[
+
+     {"nianDu":"年度",
+     "yingYeShouRu":"营业收入",
+     "yingYeLiRun":"营业利润",
+     "jingLiRun":"净利润",
+
+     "ziChanZongJi":"资产总计",
+     "fuZhanZongJi":"负债总计",
+     "suoYouZheQuanYi":"所有者权益"
+     }
+
+     ]
 
      */
     private String auditreport;
 
     /**
      * 财务报表 JSON格式
-[
-   
- {"baoBiaoRiQi":"报表日期",
-  "yingYeShouRu":"营业收入",
-  "yingYeLiRun":"营业利润",
-  "jingLiRun":"净利润",
-     
-  "ziChanZongJi":"资产总计",
-  "fuZhanZongJi":"负债总计",
- "suoYouZheQuanYi":"所有者权益"
-    } 
- 
- ]
+     [
+
+     {"baoBiaoRiQi":"报表日期",
+     "yingYeShouRu":"营业收入",
+     "yingYeLiRun":"营业利润",
+     "jingLiRun":"净利润",
+
+     "ziChanZongJi":"资产总计",
+     "fuZhanZongJi":"负债总计",
+     "suoYouZheQuanYi":"所有者权益"
+     }
+
+     ]
 
 
      */
@@ -226,33 +289,45 @@ public class ProjectClean implements Serializable {
 
     /**
      * 重要信息披露 JSON格式
-{
-  "qiTaPiLuNeiRong": "其他披露内容",
-      "guanLiCengCanYuShouRangYiXiang":"管理层拟参与受让意向"
+     {
+     "qiTaPiLuNeiRong": "其他披露内容",
+     "guanLiCengCanYuShouRangYiXiang":"管理层拟参与受让意向"
 
-}
+     }
      */
     private String imporinfordisclosure;
 
     /**
      * 转让方基本情况JSON格式
-{
-  
-"zhuanRangFangMingCheng": "转让方名称",
-  "chiGuBiLi":"持有产(股)权比例",
-  "zhuanRangGuBiLi":"拟转让产(股)权比例"
+     {
 
-}
+     "zhuanRangFangMingCheng": "转让方名称",
+     "chiGuBiLi":"持有产(股)权比例",
+     "zhuanRangGuBiLi":"拟转让产(股)权比例"
+
+     }
      */
     private String transferinfo;
 
+    public String getRightCategory() {
+        return rightCategory;
+    }
+
+    public void setRightCategory(String rightCategory) {
+        this.rightCategory = rightCategory;
+    }
+
+    private String rightCategory;
+    private String assetType;
+    private String transferorName;
+
     /**
      * 交易条件JSON格式
-{
-  "jiaKuanZhiFuFangShi": "价款支付方式",
-  "qiTaTiaoJian":"与转让相关其他条件"
+     {
+     "jiaKuanZhiFuFangShi": "价款支付方式",
+     "qiTaTiaoJian":"与转让相关其他条件"
 
-}
+     }
      */
     private String transactionterm;
 
@@ -261,37 +336,37 @@ public class ProjectClean implements Serializable {
      * 企业简况
      */
     private JSONObject qiyejiankuang;
-    
+
     /**
      * 标的所属行业
      */
     //private String category;
-    
+
     /**
      * 所在地区
      */
     private String region;
-    
+
     /**
      * 四、交易条件与受让方资格条件
      */
     private JSONObject fourJiaoYiTiaoJian;
-    
+
     /**
      * 三、转让方简况
      */
     private JSONObject zhuanRangFangJianJie;
-    
+
     /**
      * 三、转让方简况--北京
      */
     private JSONArray zhuanRangFangJianJieArr;
-    
+
     /**
      * 五、挂牌信息
      */
     private JSONObject guaPaiXinXi;
-    
+
     /**
      * 项目的来源 ，例 ：上海联合产权交易所：央企股权项目
      */
@@ -605,13 +680,13 @@ public class ProjectClean implements Serializable {
         return sb.toString();
     }
 
-	public JSONObject getQiyejiankuang() {
-		return qiyejiankuang;
-	}
+    public JSONObject getQiyejiankuang() {
+        return qiyejiankuang;
+    }
 
-	public void setQiyejiankuang(JSONObject qiyejiankuang) {
-		this.qiyejiankuang = qiyejiankuang;
-	}
+    public void setQiyejiankuang(JSONObject qiyejiankuang) {
+        this.qiyejiankuang = qiyejiankuang;
+    }
 
 	/*public String getCategory() {
 		return category;
@@ -621,52 +696,176 @@ public class ProjectClean implements Serializable {
 		this.category = category;
 	}*/
 
-	public String getRegion() {
-		return region;
-	}
+    public String getRegion() {
+        return region;
+    }
 
-	public void setRegion(String region) {
-		this.region = region;
-	}
+    public void setRegion(String region) {
+        this.region = region;
+    }
 
-	public JSONObject getFourJiaoYiTiaoJian() {
-		return fourJiaoYiTiaoJian;
-	}
+    public JSONObject getFourJiaoYiTiaoJian() {
+        return fourJiaoYiTiaoJian;
+    }
 
-	public void setFourJiaoYiTiaoJian(JSONObject fourJiaoYiTiaoJian) {
-		this.fourJiaoYiTiaoJian = fourJiaoYiTiaoJian;
-	}
+    public void setFourJiaoYiTiaoJian(JSONObject fourJiaoYiTiaoJian) {
+        this.fourJiaoYiTiaoJian = fourJiaoYiTiaoJian;
+    }
 
-	public JSONObject getZhuanRangFangJianJie() {
-		return zhuanRangFangJianJie;
-	}
+    public JSONObject getZhuanRangFangJianJie() {
+        return zhuanRangFangJianJie;
+    }
 
-	public void setZhuanRangFangJianJie(JSONObject zhuanRangFangJianJie) {
-		this.zhuanRangFangJianJie = zhuanRangFangJianJie;
-	}
+    public void setZhuanRangFangJianJie(JSONObject zhuanRangFangJianJie) {
+        this.zhuanRangFangJianJie = zhuanRangFangJianJie;
+    }
 
-	public JSONObject getGuaPaiXinXi() {
-		return guaPaiXinXi;
-	}
+    public JSONObject getGuaPaiXinXi() {
+        return guaPaiXinXi;
+    }
 
-	public void setGuaPaiXinXi(JSONObject guaPaiXinXi) {
-		this.guaPaiXinXi = guaPaiXinXi;
-	}
+    public void setGuaPaiXinXi(JSONObject guaPaiXinXi) {
+        this.guaPaiXinXi = guaPaiXinXi;
+    }
 
-	public String getLaiyuan() {
-		return laiyuan;
-	}
+    public String getLaiyuan() {
+        return laiyuan;
+    }
 
-	public void setLaiyuan(String laiyuan) {
-		this.laiyuan = laiyuan;
-	}
+    public void setLaiyuan(String laiyuan) {
+        this.laiyuan = laiyuan;
+    }
 
-	public JSONArray getZhuanRangFangJianJieArr() {
-		return zhuanRangFangJianJieArr;
-	}
+    public JSONArray getZhuanRangFangJianJieArr() {
+        return zhuanRangFangJianJieArr;
+    }
 
-	public void setZhuanRangFangJianJieArr(JSONArray zhuanRangFangJianJieArr) {
-		this.zhuanRangFangJianJieArr = zhuanRangFangJianJieArr;
-	}
-	
+    public void setZhuanRangFangJianJieArr(JSONArray zhuanRangFangJianJieArr) {
+        this.zhuanRangFangJianJieArr = zhuanRangFangJianJieArr;
+    }
+
+    //上海
+    private JSONObject jidongche;
+    //不动产
+    private JSONObject budongchan;
+    private JSONObject jixieshebei;
+    private JSONObject baozhengjinsheding;
+    private JSONObject zhongyaoxinxipilu;
+    private JSONObject zhuyaocaiwuzhibiao;
+    private JSONArray fujian;
+    //北京资产不动产
+    private JSONArray budongchanArray;
+    private JSONArray jixieshebeiArray;
+    private JSONArray jidongcheArray;
+
+    public JSONArray getJidongcheArray() {
+        return jidongcheArray;
+    }
+
+    public void setJidongcheArray(JSONArray jidongcheArray) {
+        this.jidongcheArray = jidongcheArray;
+    }
+
+    public JSONArray getJixieshebeiArray() {
+        return jixieshebeiArray;
+    }
+
+    public void setJixieshebeiArray(JSONArray jixieshebeiArray) {
+        this.jixieshebeiArray = jixieshebeiArray;
+    }
+
+    //其它披露内容
+    private String qtplnr;
+
+    public String getQtplnr() {
+        return qtplnr;
+    }
+
+    public void setQtplnr(String qtplnr) {
+        this.qtplnr = qtplnr;
+    }
+
+    public JSONArray getBudongchanArray() {
+        return budongchanArray;
+    }
+
+    public void setBudongchanArray(JSONArray budongchanArray) {
+        this.budongchanArray = budongchanArray;
+    }
+
+    public JSONArray getFujian() {
+        return fujian;
+    }
+
+    public void setFujian(JSONArray fujian) {
+        this.fujian = fujian;
+    }
+
+    public JSONObject getJidongche() {
+        return jidongche;
+    }
+
+    public void setJidongche(JSONObject jidongche) {
+        this.jidongche = jidongche;
+    }
+
+    public JSONObject getBudongchan() {
+        return budongchan;
+    }
+
+    public void setBudongchan(JSONObject budongchan) {
+        this.budongchan = budongchan;
+    }
+
+    public JSONObject getJixieshebei() {
+        return jixieshebei;
+    }
+
+    public void setJixieshebei(JSONObject jixieshebei) {
+        this.jixieshebei = jixieshebei;
+    }
+
+    public JSONObject getBaozhengjinsheding() {
+        return baozhengjinsheding;
+    }
+
+    public void setBaozhengjinsheding(JSONObject baozhengjinsheding) {
+        this.baozhengjinsheding = baozhengjinsheding;
+    }
+
+    public JSONObject getZhongyaoxinxipilu() {
+        return zhongyaoxinxipilu;
+    }
+
+    public void setZhongyaoxinxipilu(JSONObject zhongyaoxinxipilu) {
+        this.zhongyaoxinxipilu = zhongyaoxinxipilu;
+    }
+
+    public JSONObject getZhuyaocaiwuzhibiao() {
+        return zhuyaocaiwuzhibiao;
+    }
+
+    public void setZhuyaocaiwuzhibiao(JSONObject zhuyaocaiwuzhibiao) {
+        this.zhuyaocaiwuzhibiao = zhuyaocaiwuzhibiao;
+    }
+
+    public String getAssetType() {
+        return assetType;
+    }
+
+    public void setAssetType(String assetType) {
+        this.assetType = assetType;
+    }
+
+    public String getTransferorName() {
+        return transferorName;
+    }
+
+    public void setTransferorName(String transferorName) {
+        this.transferorName = transferorName;
+    }
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
 }

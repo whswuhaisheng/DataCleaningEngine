@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.binggou.cloud.persistence.annotation.CategoryDao" >
+  <resultMap id="BaseResultMap" type="com.binggou.cloud.model.Category" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="CategoryName" property="categoryname" jdbcType="VARCHAR" />
+    <result column="EnCategoryName" property="encategoryname" jdbcType="VARCHAR" />
+    <result column="FatherCatID" property="fathercatid" jdbcType="INTEGER" />
+    <result column="FatherCatName" property="fathercatname" jdbcType="VARCHAR" />
+    <result column="IsOrder" property="isorder" jdbcType="INTEGER" />
+    <result column="IsUse" property="isuse" jdbcType="INTEGER" />
+    <result column="Remark" property="remark" jdbcType="VARCHAR" />
+    <result column="AddTime" property="addtime" jdbcType="TIMESTAMP" />
+    <result column="AddUser" property="adduser" jdbcType="VARCHAR" />
+    <result column="UpdateTime" property="updatetime" jdbcType="TIMESTAMP" />
+    <result column="UpdateUser" property="updateuser" jdbcType="VARCHAR" />
+    <result column="TemplateID" property="templateid" jdbcType="INTEGER" />
+    <result column="OriginalPicUrl" property="originalpicurl" jdbcType="VARCHAR" />
+    <result column="BigPicUrl" property="bigpicurl" jdbcType="VARCHAR" />
+    <result column="CenterPicUrl" property="centerpicurl" jdbcType="VARCHAR" />
+    <result column="SmallPicUrl" property="smallpicurl" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    <if test="fields == null" >
+      id, CategoryName, EnCategoryName, FatherCatID, FatherCatName, IsOrder, IsUse, Remark, 
+      AddTime, AddUser, UpdateTime, UpdateUser, TemplateID, OriginalPicUrl, BigPicUrl, 
+      CenterPicUrl, SmallPicUrl
+    </if>
+    <if test="fields != null" >
+      ${fields}
+    </if>
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    id,CategoryName,EnCategoryName,FatherCatID,FatherCatName,IsOrder,IsUse,Remark,AddTime,AddUser,UpdateTime,UpdateUser,TemplateID,OriginalPicUrl,BigPicUrl,CenterPicUrl,SmallPicUrl
+    from bg_resource_category
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from bg_resource_category
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.binggou.cloud.model.Category" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="BEFORE" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into bg_resource_category (id, CategoryName, EnCategoryName, 
+      FatherCatID, FatherCatName, IsOrder, 
+      IsUse, Remark, AddTime, 
+      AddUser, UpdateTime, UpdateUser, 
+      TemplateID, OriginalPicUrl, BigPicUrl, 
+      CenterPicUrl, SmallPicUrl)
+    values (#{id,jdbcType=INTEGER}, #{categoryname,jdbcType=VARCHAR}, #{encategoryname,jdbcType=VARCHAR}, 
+      #{fathercatid,jdbcType=INTEGER}, #{fathercatname,jdbcType=VARCHAR}, #{isorder,jdbcType=INTEGER}, 
+      #{isuse,jdbcType=INTEGER}, #{remark,jdbcType=VARCHAR}, #{addtime,jdbcType=TIMESTAMP}, 
+      #{adduser,jdbcType=VARCHAR}, #{updatetime,jdbcType=TIMESTAMP}, #{updateuser,jdbcType=VARCHAR}, 
+      #{templateid,jdbcType=INTEGER}, #{originalpicurl,jdbcType=VARCHAR}, #{bigpicurl,jdbcType=VARCHAR}, 
+      #{centerpicurl,jdbcType=VARCHAR}, #{smallpicurl,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.binggou.cloud.model.Category" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="BEFORE" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into bg_resource_category
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      id,
+      <if test="categoryname != null" >
+        CategoryName,
+      </if>
+      <if test="encategoryname != null" >
+        EnCategoryName,
+      </if>
+      <if test="fathercatid != null" >
+        FatherCatID,
+      </if>
+      <if test="fathercatname != null" >
+        FatherCatName,
+      </if>
+      <if test="isorder != null" >
+        IsOrder,
+      </if>
+      <if test="isuse != null" >
+        IsUse,
+      </if>
+      <if test="remark != null" >
+        Remark,
+      </if>
+      <if test="addtime != null" >
+        AddTime,
+      </if>
+      <if test="adduser != null" >
+        AddUser,
+      </if>
+      <if test="updatetime != null" >
+        UpdateTime,
+      </if>
+      <if test="updateuser != null" >
+        UpdateUser,
+      </if>
+      <if test="templateid != null" >
+        TemplateID,
+      </if>
+      <if test="originalpicurl != null" >
+        OriginalPicUrl,
+      </if>
+      <if test="bigpicurl != null" >
+        BigPicUrl,
+      </if>
+      <if test="centerpicurl != null" >
+        CenterPicUrl,
+      </if>
+      <if test="smallpicurl != null" >
+        SmallPicUrl,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{id,jdbcType=INTEGER},
+      <if test="categoryname != null" >
+        #{categoryname,jdbcType=VARCHAR},
+      </if>
+      <if test="encategoryname != null" >
+        #{encategoryname,jdbcType=VARCHAR},
+      </if>
+      <if test="fathercatid != null" >
+        #{fathercatid,jdbcType=INTEGER},
+      </if>
+      <if test="fathercatname != null" >
+        #{fathercatname,jdbcType=VARCHAR},
+      </if>
+      <if test="isorder != null" >
+        #{isorder,jdbcType=INTEGER},
+      </if>
+      <if test="isuse != null" >
+        #{isuse,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="addtime != null" >
+        #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="adduser != null" >
+        #{adduser,jdbcType=VARCHAR},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateuser != null" >
+        #{updateuser,jdbcType=VARCHAR},
+      </if>
+      <if test="templateid != null" >
+        #{templateid,jdbcType=INTEGER},
+      </if>
+      <if test="originalpicurl != null" >
+        #{originalpicurl,jdbcType=VARCHAR},
+      </if>
+      <if test="bigpicurl != null" >
+        #{bigpicurl,jdbcType=VARCHAR},
+      </if>
+      <if test="centerpicurl != null" >
+        #{centerpicurl,jdbcType=VARCHAR},
+      </if>
+      <if test="smallpicurl != null" >
+        #{smallpicurl,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.binggou.cloud.model.Category" >
+    update bg_resource_category
+    <set >
+      <if test="categoryname != null" >
+        CategoryName = #{categoryname,jdbcType=VARCHAR},
+      </if>
+      <if test="encategoryname != null" >
+        EnCategoryName = #{encategoryname,jdbcType=VARCHAR},
+      </if>
+      <if test="fathercatid != null" >
+        FatherCatID = #{fathercatid,jdbcType=INTEGER},
+      </if>
+      <if test="fathercatname != null" >
+        FatherCatName = #{fathercatname,jdbcType=VARCHAR},
+      </if>
+      <if test="isorder != null" >
+        IsOrder = #{isorder,jdbcType=INTEGER},
+      </if>
+      <if test="isuse != null" >
+        IsUse = #{isuse,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        Remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="addtime != null" >
+        AddTime = #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="adduser != null" >
+        AddUser = #{adduser,jdbcType=VARCHAR},
+      </if>
+      <if test="updatetime != null" >
+        UpdateTime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateuser != null" >
+        UpdateUser = #{updateuser,jdbcType=VARCHAR},
+      </if>
+      <if test="templateid != null" >
+        TemplateID = #{templateid,jdbcType=INTEGER},
+      </if>
+      <if test="originalpicurl != null" >
+        OriginalPicUrl = #{originalpicurl,jdbcType=VARCHAR},
+      </if>
+      <if test="bigpicurl != null" >
+        BigPicUrl = #{bigpicurl,jdbcType=VARCHAR},
+      </if>
+      <if test="centerpicurl != null" >
+        CenterPicUrl = #{centerpicurl,jdbcType=VARCHAR},
+      </if>
+      <if test="smallpicurl != null" >
+        SmallPicUrl = #{smallpicurl,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.binggou.cloud.model.Category" >
+    update bg_resource_category
+    set CategoryName = #{categoryname,jdbcType=VARCHAR},
+      EnCategoryName = #{encategoryname,jdbcType=VARCHAR},
+      FatherCatID = #{fathercatid,jdbcType=INTEGER},
+      FatherCatName = #{fathercatname,jdbcType=VARCHAR},
+      IsOrder = #{isorder,jdbcType=INTEGER},
+      IsUse = #{isuse,jdbcType=INTEGER},
+      Remark = #{remark,jdbcType=VARCHAR},
+      AddTime = #{addtime,jdbcType=TIMESTAMP},
+      AddUser = #{adduser,jdbcType=VARCHAR},
+      UpdateTime = #{updatetime,jdbcType=TIMESTAMP},
+      UpdateUser = #{updateuser,jdbcType=VARCHAR},
+      TemplateID = #{templateid,jdbcType=INTEGER},
+      OriginalPicUrl = #{originalpicurl,jdbcType=VARCHAR},
+      BigPicUrl = #{bigpicurl,jdbcType=VARCHAR},
+      CenterPicUrl = #{centerpicurl,jdbcType=VARCHAR},
+      SmallPicUrl = #{smallpicurl,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <select id="selectByCategoryName" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    id,CategoryName,EnCategoryName,FatherCatID,FatherCatName,IsOrder,IsUse,Remark,AddTime,AddUser,UpdateTime,UpdateUser,TemplateID,OriginalPicUrl,BigPicUrl,CenterPicUrl,SmallPicUrl
+    from bg_resource_category
+    where FatherCatID !=-1 and FatherCatID is not null and CategoryName = #{categoryname,jdbcType=VARCHAR}
+  </select>
+  
+  <select id="selectFirstByCategoryName" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    id,CategoryName,EnCategoryName,FatherCatID,FatherCatName,IsOrder,IsUse,Remark,AddTime,AddUser,UpdateTime,UpdateUser,TemplateID,OriginalPicUrl,BigPicUrl,CenterPicUrl,SmallPicUrl
+    from bg_resource_category
+    where (FatherCatID =-1 or FatherCatID is null) and CategoryName = #{categoryname,jdbcType=VARCHAR}
+  </select>
+</mapper>

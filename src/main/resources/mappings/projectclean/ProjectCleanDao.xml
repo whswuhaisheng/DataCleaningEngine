@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.binggou.cloud.persistence.annotation.ProjectCleanDao" >
+  <resultMap id="BaseResultMap" type="com.binggou.cloud.model.ProjectClean" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="projectNumber" property="projectnumber" jdbcType="VARCHAR" />
+    <result column="yunProjectNumber" property="yunprojectnumber" jdbcType="VARCHAR" />
+    <result column="projectName" property="projectname" jdbcType="VARCHAR" />
+    <result column="beginDate" property="begindate" jdbcType="DATE" />
+    <result column="endDate" property="enddate" jdbcType="DATE" />
+    <result column="noticePeriod" property="noticeperiod" jdbcType="INTEGER" />
+    <result column="validPeriod" property="validperiod" jdbcType="INTEGER" />
+    <result column="companyName" property="companyname" jdbcType="VARCHAR" />
+    <result column="country" property="country" jdbcType="VARCHAR" />
+    <result column="province" property="province" jdbcType="VARCHAR" />
+    <result column="city" property="city" jdbcType="VARCHAR" />
+    <result column="area" property="area" jdbcType="VARCHAR" />
+    <result column="sourceArea" property="sourcearea" jdbcType="VARCHAR" />
+    <result column="projectPrice" property="projectprice" jdbcType="DOUBLE" />
+    <result column="firstCategory" property="firstcategory" jdbcType="VARCHAR" />
+    <result column="secondCategory" property="secondcategory" jdbcType="VARCHAR" />
+    <result column="sourceCategory" property="sourcecategory" jdbcType="VARCHAR" />
+    <result column="dataFrom" property="datafrom" jdbcType="TINYINT" />
+    <result column="internalReview" property="internalreview" jdbcType="VARCHAR" />
+    <result column="resolutionType" property="resolutiontype" jdbcType="VARCHAR" />
+    <result column="transactionWay" property="transactionway" jdbcType="VARCHAR" />
+    <result column="payMoney" property="paymoney" jdbcType="DOUBLE" />
+    <result column="payWay" property="payway" jdbcType="VARCHAR" />
+    <result column="payDate" property="paydate" jdbcType="VARCHAR" />
+    <result column="createDate" property="createdate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.binggou.cloud.model.ProjectClean" extends="BaseResultMap" >
+    <result column="enterpriseInfo" property="enterpriseinfo" jdbcType="LONGVARCHAR" />
+    <result column="stockStructure" property="stockstructure" jdbcType="LONGVARCHAR" />
+    <result column="auditReport" property="auditreport" jdbcType="LONGVARCHAR" />
+    <result column="financeReport" property="financereport" jdbcType="LONGVARCHAR" />
+    <result column="imporInforDisclosure" property="imporinfordisclosure" jdbcType="LONGVARCHAR" />
+    <result column="transferInfo" property="transferinfo" jdbcType="LONGVARCHAR" />
+    <result column="transactionTerm" property="transactionterm" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    <if test="fields == null" >
+      id, projectNumber, yunProjectNumber, projectName, beginDate, endDate, noticePeriod, 
+      validPeriod, companyName, country, province, city, area, sourceArea, projectPrice, 
+      firstCategory, secondCategory, sourceCategory, dataFrom, internalReview, resolutionType, 
+      transactionWay, payMoney, payWay, payDate, createDate
+    </if>
+    <if test="fields != null" >
+      ${fields}
+    </if>
+  </sql>
+  <sql id="Blob_Column_List" >
+    enterpriseInfo, stockStructure, auditReport, financeReport, imporInforDisclosure, 
+    transferInfo, transactionTerm
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer" >
+    select 
+    id,projectNumber,yunProjectNumber,projectName,beginDate,endDate,noticePeriod,validPeriod,companyName,country,province,city,area,sourceArea,projectPrice,firstCategory,secondCategory,sourceCategory,dataFrom,internalReview,resolutionType,transactionWay,payMoney,payWay,payDate,createDate,enterpriseInfo,stockStructure,auditReport,financeReport,imporInforDisclosure,transferInfo,transactionTerm
+    ,
+    <include refid="Blob_Column_List" />
+    from bg_project_clean
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from bg_project_clean
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.binggou.cloud.model.ProjectClean" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into bg_project_clean (id, projectNumber, yunProjectNumber, 
+      projectName, beginDate, endDate, 
+      noticePeriod, validPeriod, companyName, 
+      country, province, city, 
+      area, sourceArea, projectPrice, 
+      firstCategory, secondCategory, sourceCategory, 
+      dataFrom, internalReview, resolutionType, 
+      transactionWay, payMoney, payWay, 
+      payDate, createDate, enterpriseInfo, 
+      stockStructure, auditReport, financeReport, 
+      imporInforDisclosure, transferInfo, 
+      transactionTerm)
+    values (#{id,jdbcType=INTEGER}, #{projectnumber,jdbcType=VARCHAR}, #{yunprojectnumber,jdbcType=VARCHAR}, 
+      #{projectname,jdbcType=VARCHAR}, #{begindate,jdbcType=DATE}, #{enddate,jdbcType=DATE}, 
+      #{noticeperiod,jdbcType=INTEGER}, #{validperiod,jdbcType=INTEGER}, #{companyname,jdbcType=VARCHAR}, 
+      #{country,jdbcType=VARCHAR}, #{province,jdbcType=VARCHAR}, #{city,jdbcType=VARCHAR}, 
+      #{area,jdbcType=VARCHAR}, #{sourcearea,jdbcType=VARCHAR}, #{projectprice,jdbcType=DOUBLE}, 
+      #{firstcategory,jdbcType=VARCHAR}, #{secondcategory,jdbcType=VARCHAR}, #{sourcecategory,jdbcType=VARCHAR}, 
+      #{datafrom,jdbcType=TINYINT}, #{internalreview,jdbcType=VARCHAR}, #{resolutiontype,jdbcType=VARCHAR}, 
+      #{transactionway,jdbcType=VARCHAR}, #{paymoney,jdbcType=DOUBLE}, #{payway,jdbcType=VARCHAR}, 
+      #{paydate,jdbcType=VARCHAR}, #{createdate,jdbcType=TIMESTAMP}, #{enterpriseinfo,jdbcType=LONGVARCHAR}, 
+      #{stockstructure,jdbcType=LONGVARCHAR}, #{auditreport,jdbcType=LONGVARCHAR}, #{financereport,jdbcType=LONGVARCHAR}, 
+      #{imporinfordisclosure,jdbcType=LONGVARCHAR}, #{transferinfo,jdbcType=LONGVARCHAR}, 
+      #{transactionterm,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.binggou.cloud.model.ProjectClean" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="BEFORE" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into bg_project_clean
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      id,
+      <if test="projectnumber != null" >
+        projectNumber,
+      </if>
+      <if test="yunprojectnumber != null" >
+        yunProjectNumber,
+      </if>
+      <if test="projectname != null" >
+        projectName,
+      </if>
+      <if test="begindate != null" >
+        beginDate,
+      </if>
+      <if test="enddate != null" >
+        endDate,
+      </if>
+      <if test="noticeperiod != null" >
+        noticePeriod,
+      </if>
+      <if test="validperiod != null" >
+        validPeriod,
+      </if>
+      <if test="companyname != null" >
+        companyName,
+      </if>
+      <if test="country != null" >
+        country,
+      </if>
+      <if test="province != null" >
+        province,
+      </if>
+      <if test="city != null" >
+        city,
+      </if>
+      <if test="area != null" >
+        area,
+      </if>
+      <if test="sourcearea != null" >
+        sourceArea,
+      </if>
+      <if test="projectprice != null" >
+        projectPrice,
+      </if>
+      <if test="firstcategory != null" >
+        firstCategory,
+      </if>
+      <if test="secondcategory != null" >
+        secondCategory,
+      </if>
+      <if test="sourcecategory != null" >
+        sourceCategory,
+      </if>
+      <if test="datafrom != null" >
+        dataFrom,
+      </if>
+      <if test="internalreview != null" >
+        internalReview,
+      </if>
+      <if test="resolutiontype != null" >
+        resolutionType,
+      </if>
+      <if test="transactionway != null" >
+        transactionWay,
+      </if>
+      <if test="paymoney != null" >
+        payMoney,
+      </if>
+      <if test="payway != null" >
+        payWay,
+      </if>
+      <if test="paydate != null" >
+        payDate,
+      </if>
+      <if test="createdate != null" >
+        createDate,
+      </if>
+      <if test="enterpriseinfo != null" >
+        enterpriseInfo,
+      </if>
+      <if test="stockstructure != null" >
+        stockStructure,
+      </if>
+      <if test="auditreport != null" >
+        auditReport,
+      </if>
+      <if test="financereport != null" >
+        financeReport,
+      </if>
+      <if test="imporinfordisclosure != null" >
+        imporInforDisclosure,
+      </if>
+      <if test="transferinfo != null" >
+        transferInfo,
+      </if>
+      <if test="transactionterm != null" >
+        transactionTerm,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{id,jdbcType=INTEGER},
+      <if test="projectnumber != null" >
+        #{projectnumber,jdbcType=VARCHAR},
+      </if>
+      <if test="yunprojectnumber != null" >
+        #{yunprojectnumber,jdbcType=VARCHAR},
+      </if>
+      <if test="projectname != null" >
+        #{projectname,jdbcType=VARCHAR},
+      </if>
+      <if test="begindate != null" >
+        #{begindate,jdbcType=DATE},
+      </if>
+      <if test="enddate != null" >
+        #{enddate,jdbcType=DATE},
+      </if>
+      <if test="noticeperiod != null" >
+        #{noticeperiod,jdbcType=INTEGER},
+      </if>
+      <if test="validperiod != null" >
+        #{validperiod,jdbcType=INTEGER},
+      </if>
+      <if test="companyname != null" >
+        #{companyname,jdbcType=VARCHAR},
+      </if>
+      <if test="country != null" >
+        #{country,jdbcType=VARCHAR},
+      </if>
+      <if test="province != null" >
+        #{province,jdbcType=VARCHAR},
+      </if>
+      <if test="city != null" >
+        #{city,jdbcType=VARCHAR},
+      </if>
+      <if test="area != null" >
+        #{area,jdbcType=VARCHAR},
+      </if>
+      <if test="sourcearea != null" >
+        #{sourcearea,jdbcType=VARCHAR},
+      </if>
+      <if test="projectprice != null" >
+        #{projectprice,jdbcType=DOUBLE},
+      </if>
+      <if test="firstcategory != null" >
+        #{firstcategory,jdbcType=VARCHAR},
+      </if>
+      <if test="secondcategory != null" >
+        #{secondcategory,jdbcType=VARCHAR},
+      </if>
+      <if test="sourcecategory != null" >
+        #{sourcecategory,jdbcType=VARCHAR},
+      </if>
+      <if test="datafrom != null" >
+        #{datafrom,jdbcType=TINYINT},
+      </if>
+      <if test="internalreview != null" >
+        #{internalreview,jdbcType=VARCHAR},
+      </if>
+      <if test="resolutiontype != null" >
+        #{resolutiontype,jdbcType=VARCHAR},
+      </if>
+      <if test="transactionway != null" >
+        #{transactionway,jdbcType=VARCHAR},
+      </if>
+      <if test="paymoney != null" >
+        #{paymoney,jdbcType=DOUBLE},
+      </if>
+      <if test="payway != null" >
+        #{payway,jdbcType=VARCHAR},
+      </if>
+      <if test="paydate != null" >
+        #{paydate,jdbcType=VARCHAR},
+      </if>
+      <if test="createdate != null" >
+        #{createdate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="enterpriseinfo != null" >
+        #{enterpriseinfo,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="stockstructure != null" >
+        #{stockstructure,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="auditreport != null" >
+        #{auditreport,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="financereport != null" >
+        #{financereport,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="imporinfordisclosure != null" >
+        #{imporinfordisclosure,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="transferinfo != null" >
+        #{transferinfo,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="transactionterm != null" >
+        #{transactionterm,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.binggou.cloud.model.ProjectClean" >
+    update bg_project_clean
+    <set >
+      <if test="projectnumber != null" >
+        projectNumber = #{projectnumber,jdbcType=VARCHAR},
+      </if>
+      <if test="yunprojectnumber != null" >
+        yunProjectNumber = #{yunprojectnumber,jdbcType=VARCHAR},
+      </if>
+      <if test="projectname != null" >
+        projectName = #{projectname,jdbcType=VARCHAR},
+      </if>
+      <if test="begindate != null" >
+        beginDate = #{begindate,jdbcType=DATE},
+      </if>
+      <if test="enddate != null" >
+        endDate = #{enddate,jdbcType=DATE},
+      </if>
+      <if test="noticeperiod != null" >
+        noticePeriod = #{noticeperiod,jdbcType=INTEGER},
+      </if>
+      <if test="validperiod != null" >
+        validPeriod = #{validperiod,jdbcType=INTEGER},
+      </if>
+      <if test="companyname != null" >
+        companyName = #{companyname,jdbcType=VARCHAR},
+      </if>
+      <if test="country != null" >
+        country = #{country,jdbcType=VARCHAR},
+      </if>
+      <if test="province != null" >
+        province = #{province,jdbcType=VARCHAR},
+      </if>
+      <if test="city != null" >
+        city = #{city,jdbcType=VARCHAR},
+      </if>
+      <if test="area != null" >
+        area = #{area,jdbcType=VARCHAR},
+      </if>
+      <if test="sourcearea != null" >
+        sourceArea = #{sourcearea,jdbcType=VARCHAR},
+      </if>
+      <if test="projectprice != null" >
+        projectPrice = #{projectprice,jdbcType=DOUBLE},
+      </if>
+      <if test="firstcategory != null" >
+        firstCategory = #{firstcategory,jdbcType=VARCHAR},
+      </if>
+      <if test="secondcategory != null" >
+        secondCategory = #{secondcategory,jdbcType=VARCHAR},
+      </if>
+      <if test="sourcecategory != null" >
+        sourceCategory = #{sourcecategory,jdbcType=VARCHAR},
+      </if>
+      <if test="datafrom != null" >
+        dataFrom = #{datafrom,jdbcType=TINYINT},
+      </if>
+      <if test="internalreview != null" >
+        internalReview = #{internalreview,jdbcType=VARCHAR},
+      </if>
+      <if test="resolutiontype != null" >
+        resolutionType = #{resolutiontype,jdbcType=VARCHAR},
+      </if>
+      <if test="transactionway != null" >
+        transactionWay = #{transactionway,jdbcType=VARCHAR},
+      </if>
+      <if test="paymoney != null" >
+        payMoney = #{paymoney,jdbcType=DOUBLE},
+      </if>
+      <if test="payway != null" >
+        payWay = #{payway,jdbcType=VARCHAR},
+      </if>
+      <if test="paydate != null" >
+        payDate = #{paydate,jdbcType=VARCHAR},
+      </if>
+      <if test="createdate != null" >
+        createDate = #{createdate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="enterpriseinfo != null" >
+        enterpriseInfo = #{enterpriseinfo,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="stockstructure != null" >
+        stockStructure = #{stockstructure,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="auditreport != null" >
+        auditReport = #{auditreport,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="financereport != null" >
+        financeReport = #{financereport,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="imporinfordisclosure != null" >
+        imporInforDisclosure = #{imporinfordisclosure,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="transferinfo != null" >
+        transferInfo = #{transferinfo,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="transactionterm != null" >
+        transactionTerm = #{transactionterm,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.binggou.cloud.model.ProjectClean" >
+    update bg_project_clean
+    set projectNumber = #{projectnumber,jdbcType=VARCHAR},
+      yunProjectNumber = #{yunprojectnumber,jdbcType=VARCHAR},
+      projectName = #{projectname,jdbcType=VARCHAR},
+      beginDate = #{begindate,jdbcType=DATE},
+      endDate = #{enddate,jdbcType=DATE},
+      noticePeriod = #{noticeperiod,jdbcType=INTEGER},
+      validPeriod = #{validperiod,jdbcType=INTEGER},
+      companyName = #{companyname,jdbcType=VARCHAR},
+      country = #{country,jdbcType=VARCHAR},
+      province = #{province,jdbcType=VARCHAR},
+      city = #{city,jdbcType=VARCHAR},
+      area = #{area,jdbcType=VARCHAR},
+      sourceArea = #{sourcearea,jdbcType=VARCHAR},
+      projectPrice = #{projectprice,jdbcType=DOUBLE},
+      firstCategory = #{firstcategory,jdbcType=VARCHAR},
+      secondCategory = #{secondcategory,jdbcType=VARCHAR},
+      sourceCategory = #{sourcecategory,jdbcType=VARCHAR},
+      dataFrom = #{datafrom,jdbcType=TINYINT},
+      internalReview = #{internalreview,jdbcType=VARCHAR},
+      resolutionType = #{resolutiontype,jdbcType=VARCHAR},
+      transactionWay = #{transactionway,jdbcType=VARCHAR},
+      payMoney = #{paymoney,jdbcType=DOUBLE},
+      payWay = #{payway,jdbcType=VARCHAR},
+      payDate = #{paydate,jdbcType=VARCHAR},
+      createDate = #{createdate,jdbcType=TIMESTAMP},
+      enterpriseInfo = #{enterpriseinfo,jdbcType=LONGVARCHAR},
+      stockStructure = #{stockstructure,jdbcType=LONGVARCHAR},
+      auditReport = #{auditreport,jdbcType=LONGVARCHAR},
+      financeReport = #{financereport,jdbcType=LONGVARCHAR},
+      imporInforDisclosure = #{imporinfordisclosure,jdbcType=LONGVARCHAR},
+      transferInfo = #{transferinfo,jdbcType=LONGVARCHAR},
+      transactionTerm = #{transactionterm,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.binggou.cloud.model.ProjectClean" >
+    update bg_project_clean
+    set projectNumber = #{projectnumber,jdbcType=VARCHAR},
+      yunProjectNumber = #{yunprojectnumber,jdbcType=VARCHAR},
+      projectName = #{projectname,jdbcType=VARCHAR},
+      beginDate = #{begindate,jdbcType=DATE},
+      endDate = #{enddate,jdbcType=DATE},
+      noticePeriod = #{noticeperiod,jdbcType=INTEGER},
+      validPeriod = #{validperiod,jdbcType=INTEGER},
+      companyName = #{companyname,jdbcType=VARCHAR},
+      country = #{country,jdbcType=VARCHAR},
+      province = #{province,jdbcType=VARCHAR},
+      city = #{city,jdbcType=VARCHAR},
+      area = #{area,jdbcType=VARCHAR},
+      sourceArea = #{sourcearea,jdbcType=VARCHAR},
+      projectPrice = #{projectprice,jdbcType=DOUBLE},
+      firstCategory = #{firstcategory,jdbcType=VARCHAR},
+      secondCategory = #{secondcategory,jdbcType=VARCHAR},
+      sourceCategory = #{sourcecategory,jdbcType=VARCHAR},
+      dataFrom = #{datafrom,jdbcType=TINYINT},
+      internalReview = #{internalreview,jdbcType=VARCHAR},
+      resolutionType = #{resolutiontype,jdbcType=VARCHAR},
+      transactionWay = #{transactionway,jdbcType=VARCHAR},
+      payMoney = #{paymoney,jdbcType=DOUBLE},
+      payWay = #{payway,jdbcType=VARCHAR},
+      payDate = #{paydate,jdbcType=VARCHAR},
+      createDate = #{createdate,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <!-- 根据projectNumber 查询项目，插入时检查是否有重复数据 -->
+  <select id="selectByProjectNumber" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    id,projectNumber,yunProjectNumber,projectName,beginDate,endDate,noticePeriod,validPeriod,companyName,country,province,city,area,sourceArea,projectPrice,firstCategory,secondCategory,sourceCategory,dataFrom,internalReview,resolutionType,transactionWay,payMoney,payWay,payDate,createDate,enterpriseInfo,stockStructure,auditReport,financeReport,imporInforDisclosure,transferInfo,transactionTerm
+    from bg_project_clean
+    where projectNumber = #{projectnumber,jdbcType=VARCHAR}
+  </select>
+</mapper>

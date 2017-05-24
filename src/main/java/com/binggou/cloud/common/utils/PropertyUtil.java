@@ -15,10 +15,17 @@ public class PropertyUtil {
     private static Properties pro;
     private static InputStream in;
 
-    static {
+
+    public static void getNameList(String key) {
         try {
             pro = new Properties();
-            in = PropertyUtil.class.getResourceAsStream("/compar.properties");
+            if("上海资产".equals(key)){
+                in = PropertyUtil.class.getResourceAsStream("/properties/shanghaizichan.properties");
+            }else if("北京资产".equals(key)){
+                in = PropertyUtil.class.getResourceAsStream("/properties/beijingzichan.properties");
+            }else{
+                in = PropertyUtil.class.getResourceAsStream("/properties/compar.properties");
+            }
             pro.load(in);
             in.close();
         } catch (FileNotFoundException e) {
@@ -28,9 +35,7 @@ public class PropertyUtil {
         } catch (Exception e) {
             System.out.println("property file not exits");
         }
-
     }
-
 
 
     public static String getStringProperty(String key) {
@@ -51,7 +56,8 @@ public class PropertyUtil {
         return null;
     }
 
-    public static List<String> getPropertyNames(){
+    public static List<String> getPropertyNames(String key){
+        getNameList(key);
         if (pro == null) {
             return null;
         }
